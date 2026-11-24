@@ -171,6 +171,11 @@ def test_env_overrides(monkeypatch) -> None:
     assert settings.use_asknews is True
 
 
+def test_asknews_single_api_key_turns_it_on(monkeypatch) -> None:
+    monkeypatch.setenv("ASKNEWS_API_KEY", "key")
+    assert BotSettings.from_env().use_asknews is True
+
+
 def test_budget_profile_defaults(monkeypatch) -> None:
     monkeypatch.setenv("BOT_PROFILE", "budget")
     settings = BotSettings.from_env()

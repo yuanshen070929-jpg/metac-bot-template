@@ -30,7 +30,7 @@
 | 时间信息 | 只告诉模型"今天几号" | 代码算好开题、截止、结题时间和剩余天数 |
 | 提示词 | 现状、正反情景 | 判定机制 → 现状 → 基准率（附时间缩放公式）→ 证据 → 情景 → 校准检查 |
 | 成本控制 | 无 | 每次运行最多处理 N 题；先做快截止的题；马上截止的题直接跳过 |
-| 测试 | 无 | 29 个离线测试，用假模型跑完整流程，不联网也不花钱 |
+| 测试 | 无 | 30 个离线测试，用假模型跑完整流程，不联网也不花钱 |
 
 最终答案的格式和解析逻辑沿用官方模板，Metaculus 每个赛季都会维护这部分。
 
@@ -42,7 +42,7 @@
 2. **添加密钥**：打开 Settings → Secrets and variables → Actions → **New repository secret**，逐个添加：
    - `METACULUS_TOKEN`：**bot 账号**的 token，不是你个人账号的。在 Metaculus 设置 → My Forecasting Bots 里找；
    - `OPENROUTER_API_KEY`：在 openrouter.ai → Keys 新建，建议给这个 key 设一个额度上限；
-   - （可选）`ASKNEWS_CLIENT_ID`、`ASKNEWS_SECRET`：AskNews 批下来以后再加，加了会自动启用。
+   - （可选）AskNews 的密钥：在 my.asknews.app 点 Create key。如果给的是一个 API key，就存成 `ASKNEWS_API_KEY`；如果给的是 Client ID 和 Secret，就分别存成 `ASKNEWS_CLIENT_ID` 和 `ASKNEWS_SECRET`。加了就会自动启用。
 3. **启用 Actions**：打开仓库的 Actions 页面，点 "I understand my workflows, go ahead and enable them"。Fork 出来的仓库默认不运行定时任务，这一步必须手动点。
 4. **跑一次测试**：Actions → **Test Bot** → Run workflow。它会先跑离线测试，再在 [bot-testing-area](https://www.metaculus.com/tournament/bot-testing-area/) 的练习题上真实预测并发帖（练习题不计分）。查看结果的方法：用你本人的账号登录 Metaculus → Settings → My Forecasting Bots → Switch to bot account，然后打开日志里列出的题目链接。
 5. **正式运行**："Forecast on new AI tournament questions" 每 20 分钟自动跑一次，已经预测过的题会跳过，没有新题的时候不花钱。
