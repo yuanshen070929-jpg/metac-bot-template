@@ -10,7 +10,7 @@ on:
         type: boolean
         default: false
       max_questions:
-        description: "How many test questions to forecast (each costs a few cents of LLM credit)"
+        description: "How many test questions to forecast (each costs roughly $0.3-0.6 of LLM credit)"
         default: "4"
 
 concurrency:
