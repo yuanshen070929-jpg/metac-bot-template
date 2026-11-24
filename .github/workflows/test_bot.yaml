@@ -1,20 +1,27 @@
 name: Test Bot
 
+# Manual smoke test on the bot-testing-area tournament (practice questions, no score).
+# Actions -> Test Bot -> Run workflow.
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (forecast but do not post to Metaculus)"
+        type: boolean
+        default: false
+      max_questions:
+        description: "How many test questions to forecast (each costs a few cents of LLM credit)"
+        default: "4"
 
-# Add concurrency group to prevent parallel runs
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
-
-# Daily job to run the simple forecast bot
 jobs:
   forecast_job:
-    runs-on: ubuntu-latest # determines the machine that will run the job - keep as is
-    steps: # sets up the steps that will be run in order
-      # setup repository with all necessary dependencies - keep as is
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,17 +33,27 @@ jobs:
           version: "0.13.1"
       - name: Install dependencies
         run: uv sync --locked
-      - name: Run bot
+      - name: Run offline tests
+        run: uv run pytest -q
+      - name: Run bot on test questions
         run: |
-          uv run python main.py --mode test_questions
-        # this reads the environment variables from the github repository.
-        # Store under Settings --> Secrets and variables --> Actions
+          EXTRA=""
+          if [ "${DRY_RUN}" = "true" ]; then EXTRA="--dry-run"; fi
+          uv run python run_bot.py --mode test_questions --max-questions "${MAX_QUESTIONS}" $EXTRA
         env:
-          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }} # replace this with the name of the variable under which you stored your own Metaculus token
+          DRY_RUN: ${{ inputs.dry_run }}
+          MAX_QUESTIONS: ${{ inputs.max_questions }}
+          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ASKNEWS_CLIENT_ID: ${{ secrets.ASKNEWS_CLIENT_ID }}
           ASKNEWS_SECRET: ${{ secrets.ASKNEWS_SECRET }}
+          BOT_PROFILE: ${{ vars.BOT_PROFILE }}
+          FORECASTER_MODELS: ${{ vars.FORECASTER_MODELS }}
+          RESEARCH_MODELS: ${{ vars.RESEARCH_MODELS }}
+          SAMPLES_PER_MODEL: ${{ vars.SAMPLES_PER_MODEL }}
+          REASONING_EFFORT: ${{ vars.REASONING_EFFORT }}
+          USE_ASKNEWS: ${{ vars.USE_ASKNEWS }}

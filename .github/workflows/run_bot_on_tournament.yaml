@@ -3,20 +3,18 @@ name: Forecast on new AI tournament questions
 on:
   workflow_dispatch:
   schedule:
-    - cron: "7,27,47 * * * *" # every 20 min, offset off the hour. Make sure to skip already-forecasted questions!
+    - cron: "7,27,47 * * * *" # every 20 min, off the hour. Already-forecast questions are skipped, so idle runs cost nothing.
 
-# Add concurrency group to prevent parallel runs
+# Never run two forecasting jobs at once.
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
-
-# Daily job to run the simple forecast bot
 jobs:
   forecast_job:
-    runs-on: ubuntu-latest # determines the machine that will run the job - keep as is
-    steps: # sets up the steps that will be run in order
-      # setup repository with all necessary dependencies - keep as is
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,16 +27,25 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked
       - name: Run bot
-        run: |
-          uv run python main.py
-        # this reads the environment variables from the github repository.
-        # Store under Settings --> Secrets and variables --> Actions
+        # RUN_MODE (repository variable): tournament (default: seasonal tournament + MiniBench), main, or minibench
+        run: uv run python run_bot.py --mode "${RUN_MODE:-tournament}"
         env:
-          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }} # replace this with the name of the variable under which you stored your own Metaculus token
+          RUN_MODE: ${{ vars.RUN_MODE }}
+          # Secrets: Settings -> Secrets and variables -> Actions -> Secrets
+          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ASKNEWS_CLIENT_ID: ${{ secrets.ASKNEWS_CLIENT_ID }}
           ASKNEWS_SECRET: ${{ secrets.ASKNEWS_SECRET }}
+          # Optional settings: Settings -> Secrets and variables -> Actions -> Variables (see README)
+          BOT_PROFILE: ${{ vars.BOT_PROFILE }}
+          FORECASTER_MODELS: ${{ vars.FORECASTER_MODELS }}
+          RESEARCH_MODELS: ${{ vars.RESEARCH_MODELS }}
+          SAMPLES_PER_MODEL: ${{ vars.SAMPLES_PER_MODEL }}
+          REASONING_EFFORT: ${{ vars.REASONING_EFFORT }}
+          MAX_QUESTIONS_PER_RUN: ${{ vars.MAX_QUESTIONS_PER_RUN }}
+          TOURNAMENT_IDS: ${{ vars.TOURNAMENT_IDS }}
+          USE_ASKNEWS: ${{ vars.USE_ASKNEWS }}

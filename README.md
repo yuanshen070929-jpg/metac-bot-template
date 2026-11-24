@@ -1,241 +1,120 @@
-# Simple Metaculus forecasting bot
-This repository contains a simple bot meant to get you started with creating your own bot for the AI Forecasting Tournament. Go to https://www.metaculus.com/futureeval/participate/ for more info and tournament rules (and then go to the  "Getting Started" section of our [resources](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#want-to-join-the-ai-forecasting-benchmark) page).
+# YuanShenbot · Metaculus FutureEval 预测机器人
 
-**Brand new to this?** You can get a working bot running in about 5 minutes without writing a single line of code — just fork this repo, paste two API keys into GitHub, and click "Run workflow". See **[Quick start](#quick-start--fork-and-use-github-actions)** below.
+这是参加 [Metaculus FutureEval](https://www.metaculus.com/futureeval/participate/) 机器人锦标赛用的预测 bot，在 Metaculus 官方模板 [metac-bot-template](https://github.com/Metaculus/metac-bot-template) 的基础上改成了"多家模型集成"的版本。
 
-In this project are 2 files:
-- **main.py**: Our recommended template option that uses the [forecasting-tools](https://github.com/Metaculus/forecasting-tools) package to handle a lot of stuff in the background for you (such as API calls). We will update the package, thus allowing you to gain new features with minimal changes to your code.
-- **main_with_no_framework.py**: A copy of main.py but implemented with minimal dependencies. Useful if you want a more custom approach.
+官方模板的文件（`main.py`、`main_with_no_framework.py` 等）原样保留，方便对照。新写的代码在 `ensemble_bot/` 和 `run_bot.py`，GitHub Actions 已经改成运行新 bot。官方模板原来的英文说明见 [上游 README](https://github.com/Metaculus/metac-bot-template#readme)。
 
-> **Want a stronger starting point than this template?** This repo is deliberately simple. Several community bots that have out-performed it in past tournaments are open source, and you can fork one of those instead. See the **[Open Source Bots](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#open-source-bots)** section of the resources page — each entry links to the bot's repo and shows where it placed. The setup below (API keys, GitHub Actions) largely carries over since most of them are built on this template or the same `forecasting-tools` package.
+---
 
+## 它怎么预测一道题
 
-Join the conversation about bot creation, get support, and follow updates on the [Metaculus Discord](https://discord.com/invite/NJgCC2nDfh) 'build a forecasting bot' channel.
-
-## 30min Video Tutorial
-This tutorial shows you how to set up our template bot so you can start forecasting in the tournament.
-
-[![Watch the tutorial](https://cdn.loom.com/sessions/thumbnails/fc3c1a643b984a15b510647d8f760685-42b452e1ab7d2afa-full-play.gif)](https://www.loom.com/share/fc3c1a643b984a15b510647d8f760685?sid=29b502e0-cf64-421e-82c0-3a78451159ed)
-
-If you run into trouble, reach out to `ben [at] metaculus [.com]`
-
-
-## Quick start -> Fork and use Github Actions
-The easiest way to use this repo is to fork it, paste in two API keys, and click "Run workflow". After that, the bot will keep forecasting on new questions automatically every 20 minutes — no local setup needed.
-
-1) **Fork the repository**: go to the [repository](https://github.com/Metaculus/metac-bot-template) and click **Fork** in the top right.
-2) **Add your two API keys as repository secrets**: in your fork, go to `Settings → Secrets and variables → Actions → New repository secret`. Add these two (names must match exactly, all caps):
-   - **`METACULUS_TOKEN`** — create one at https://www.metaculus.com/futureeval/participate/ (see the [resources page](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#creating-your-bot-account-and-metaculus-token) if you get stuck).
-   - **`OPENROUTER_API_KEY`** — get free credits via [this form](https://forms.gle/aQdYMq9Pisrf1v7d8), or make your own key on [OpenRouter](https://openrouter.ai/). You can also use `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `ASKNEWS_SECRET`, etc. — these all work out of the box if you set them.
-3) **Enable Actions**: click the `Actions` tab, then click `I understand my workflows, go ahead and enable them`.
-4) **Run the test workflow to confirm everything works**: go to `Actions → Test Bot → Run workflow → Run workflow` (green button). This forecasts on whatever's currently open in the [bot-testing-area tournament](https://www.metaculus.com/tournament/bot-testing-area/) so you can verify your setup posts forecasts to Metaculus end-to-end. Once the run finishes (~3–5 min), [switch to your bot account](#seeing-your-bots-forecasts) on Metaculus to check that the forecasts landed. They won't show up on your human account.
-5) **You're done! (and participation form)**: The `Forecast on new AI tournament questions` workflow is already enabled and will run every 20 minutes, picking up any new tournament questions and skipping ones it has already forecast on. Before you start submitting forecasts, all participants are required to fill out the first section of our [participation](https://forms.gle/aQdYMq9Pisrf1v7d8) form. There are only 3 required questions, so it should be pretty quick. This form is used to help us learn about the demographics and motivations of our community in FutureEval, amplify individual projects/research, and also to collect applications for LLM credits.
-
-To pause your bot, go to `Actions → Forecast on new AI tournament questions → ... (top right) → Disable workflow`.
-
-### Seeing your bot's forecasts
-Your bot's forecasts belong to the bot account, so they won't show up under your own predictions. To see them:
-1. Log in to Metaculus with your human account.
-2. Click your username (top right) and go to `Settings → My Forecasting Bots`.
-3. Click `Switch to bot account` next to your bot.
-4. Open a question your bot forecasted on. The end of each run's log (in GitHub Actions or your terminal) links to every question it forecasted. The bot's forecast is on the graph, and its reasoning is in the `Private` comments tab.
-
-See the [resources page](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#how-to-view-your-bots-comments-and-forecasts) for more details.
-
-### Testing your changes against the GitHub Actions workflow
-You can run any workflow against any branch — no need to merge to `main` first, and no need to fork if you have push access to this repo.
-
-1. Push your branch to GitHub: `git push origin <your-branch>`.
-2. In the repo's Actions tab, pick the workflow you want to run (e.g. `Test Bot`) and click **Run workflow** (top right).
-3. Use the **"Use workflow from"** dropdown to select your branch instead of `main`, then click the green **Run workflow** button.
-
-The runner checks out your branch and uses the repo's existing secrets — those are scoped to the repo, not the branch, so they work for any branch in the same repo. This works for all three workflows.
-
-## API Keys
-Instructions for getting your METACULUS_TOKEN, OPENROUTER_API_KEY, or optional search provider API keys (AskNews, Exa, Perplexity, etc) are listed on the "Getting Started" section of the [resources](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#want-to-join-the-ai-forecasting-benchmark) page.
-
-## Changing the Github automation
-To run a different script under the same workflows, edit the `uv run python main.py` line in the appropriate file under `.github/workflows/` and replace `main.py` with your script. The workflows that exist:
-- `test_bot.yaml` — manual-trigger smoke test against the bot-testing-area tournament.
-- `run_bot_on_tournament.yaml` — every 20 min on the live AIB tournament + MiniBench.
-- `run_bot_on_metaculus_cup.yaml` — every 2 days on the Metaculus Cup.
-
-**To run `main_with_no_framework.py` via GitHub Actions instead of `main.py`:** open the workflow file you want and change `uv run python main.py` to `uv run python main_with_no_framework.py`. That's the only change required.
-
-## Editing in GitHub UI
-Remember that you can edit a bot non locally by clicking on a file in Github, and then clicking the 'Edit this file' button. Whether you develop locally or not, when making edits, attempt to do things that you think others have not tried, as this will help further innovation in the field more than doing something that has already been done. Feel free to ask about what has or has not been tried in the Discord, see [other bot's self-descriptions](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#what-are-other-bots-doing), or read bot's [open source code](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#open-source-bots). Remember you don't have to build on this template at all — forking one of the higher-ranked [open source bots](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#open-source-bots) is a perfectly good way to start.
-
-## Run/Edit the bot locally
-Local development is optional — most new users can run the bot entirely from GitHub Actions (see [Quick start](#quick-start--fork-and-use-github-actions)). Set up locally only if you want faster iteration on your prompts/code.
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/Metaculus/metac-bot-template.git
-cd metac-bot-template
 ```
-If you've already forked the repo, replace the URL with your fork's URL (copy it from your fork's page in the browser).
-
-### 2. Install uv
-This project uses [uv](https://docs.astral.sh/uv/) to manage Python and dependencies. Install it with uv's [install docs](https://docs.astral.sh/uv/getting-started/installation/) (works on macOS, Linux, and Windows).
-
-Confirm it is on your `PATH`:
-```bash
-uv --version
+题目 ──► ① 研究（几路来源并行）──► ② 三家模型各自独立预测 ──► ③ 聚合 ──► ④ 发布预测 + 私密评论
 ```
 
-You don't need to install Python separately: if you don't have Python 3.11, 3.12 or 3.13, uv downloads one in the next step. Python 3.14 isn't supported yet because `forecasting-tools` relies on `nest_asyncio`, which breaks on 3.14.
+1. **研究**：下面几路同时跑，任何一路失败都不影响其他：
+   - **AskNews 新闻检索**：比赛参与者可以免费用，有 key 才会开启；
+   - **联网搜索模型**：默认 `gpt-6.1-terra:online`（OpenAI 原生联网搜索）和 Perplexity `sonar-pro`；
+   - **直接读判定数据源**：很多题会写明"以某某网页的数据为准"。bot 会把这些网页抓下来，让一个便宜的小模型只摘出跟判定有关的数字和日期；
+   - **时间信息由代码计算**：今天的日期、截止时间、结题日期、还剩多少天，不让模型自己猜。
+2. **预测**：同一份研究交给三个不同厂商的前沿模型，各自独立推理。默认是 OpenAI `gpt-6.2-sol`、Anthropic `claude-opus-5.5`、Google `gemini-4-argon`。Gemini 调用失败时会自动换成 `gemini-3.8-flash` 补位。只要有一个模型成功，这道题就照样发布。
+3. **聚合**：沿用 forecasting-tools 自带的方法，二元题取中位数，多选题取平均，数值题对累积分布逐点取中位数。
+4. **评论**：每道题会自动发一条私密评论，里面有研究内容和每个模型完整的推理过程，并标明是哪个模型写的。拿奖要求评论如实反映 bot 的推理，这一步是自动完成的。
 
-### 3. Install dependencies
-From inside the cloned repository:
+### 和官方模板相比改了什么
+
+| | 官方模板 | 这个 bot |
+|---|---|---|
+| 预测模型 | 同一个模型重复 5 次 | 三家厂商的模型各 1 次。不同厂商犯的错相关性更低，取中位数更稳 |
+| 研究 | 一个来源 | 新闻 + 联网搜索 + 直接读判定数据源，并行执行 |
+| 时间信息 | 只告诉模型"今天几号" | 代码算好开题、截止、结题时间和剩余天数 |
+| 提示词 | 现状、正反情景 | 判定机制 → 现状 → 基准率（附时间缩放公式）→ 证据 → 情景 → 校准检查 |
+| 成本控制 | 无 | 每次运行最多处理 N 题；先做快截止的题；马上截止的题直接跳过 |
+| 测试 | 无 | 29 个离线测试，用假模型跑完整流程，不联网也不花钱 |
+
+最终答案的格式和解析逻辑沿用官方模板，Metaculus 每个赛季都会维护这部分。
+
+---
+
+## 第一次部署
+
+1. **Fork 仓库**：已经完成，就是这个仓库。仓库要保持公开：公开仓库的 GitHub Actions 免费且不限时长，私有仓库每月只有 2000 分钟，bot 每 20 分钟跑一次会超额。
+2. **添加密钥**：打开 Settings → Secrets and variables → Actions → **New repository secret**，逐个添加：
+   - `METACULUS_TOKEN`：**bot 账号**的 token，不是你个人账号的。在 Metaculus 设置 → My Forecasting Bots 里找；
+   - `OPENROUTER_API_KEY`：在 openrouter.ai → Keys 新建，建议给这个 key 设一个额度上限；
+   - （可选）`ASKNEWS_CLIENT_ID`、`ASKNEWS_SECRET`：AskNews 批下来以后再加，加了会自动启用。
+3. **启用 Actions**：打开仓库的 Actions 页面，点 "I understand my workflows, go ahead and enable them"。Fork 出来的仓库默认不运行定时任务，这一步必须手动点。
+4. **跑一次测试**：Actions → **Test Bot** → Run workflow。它会先跑离线测试，再在 [bot-testing-area](https://www.metaculus.com/tournament/bot-testing-area/) 的练习题上真实预测并发帖（练习题不计分）。查看结果的方法：用你本人的账号登录 Metaculus → Settings → My Forecasting Bots → Switch to bot account，然后打开日志里列出的题目链接。
+5. **正式运行**："Forecast on new AI tournament questions" 每 20 分钟自动跑一次，已经预测过的题会跳过，没有新题的时候不花钱。
+
+## 可选设置
+
+在 Settings → Secrets and variables → Actions → **Variables** 里添加仓库变量，不用改代码。都不设就用默认值。
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `RUN_MODE` | `tournament` | `tournament` = 赛季主赛 + MiniBench；`main` = 只跑主赛；`minibench` = 只跑 MiniBench |
+| `BOT_PROFILE` | `standard` | `standard`：gpt-6.2-sol + claude-opus-5.5 + gemini-4-argon；`budget`：gpt-6.1-terra + claude-sonnet-5.5 + gemini-3.8-flash |
+| `FORECASTER_MODELS` | （按 profile） | 自定义参与集成的模型，逗号分隔的 OpenRouter 模型名；`a\|b` 表示 a 失败时用 b |
+| `RESEARCH_MODELS` | （按 profile） | 联网搜索模型，逗号分隔；填 `none` 表示关闭 |
+| `SAMPLES_PER_MODEL` | `1` | 每个模型对每道题预测几次 |
+| `REASONING_EFFORT` | standard 为 `high`，budget 为 `medium` | 模型的推理强度：`low` / `medium` / `high` / `none` |
+| `MAX_QUESTIONS_PER_RUN` | `15` | 每次运行最多处理几道题，剩下的留给下一次 |
+| `USE_ASKNEWS` | 有 key 就开 | 强制开（`true`）或关（`false`）AskNews |
+| `TOURNAMENT_IDS` | （库里的当前赛季） | 手动指定主赛和 MiniBench 的 ID 或 slug，逗号分隔；换赛季时有用 |
+
+## 成本（粗略估算）
+
+- `standard`：每题约 **$0.4–0.6**；`budget`：每题约 **$0.15–0.25**。这是按当前 OpenRouter 价格粗算的，实际花费以 OpenRouter 后台为准。
+- MiniBench 每两周一轮，每轮约 60 题；赛季主赛每季 300–400 题。
+- 拿到 Metaculus 的免费额度之前，建议设 `RUN_MODE=minibench`，必要时再加 `BOT_PROFILE=budget`。
+- 一定要在 OpenRouter 上给 key 设额度上限。
+
+## 比赛规则提醒
+
+- 每道题都要有评论，并如实反映推理过程。bot 会自动发。
+- 参赛表要填，每个赛季结束后的 bot 问卷也必须填，否则拿不到奖。
+- bot 必须全自动运行。按官方以往的规则，不能先看 bot 在正在进行的比赛题上怎么预测，再据此改 bot 去"修"这些题，这算 human in the loop。要改进 bot，请用已经结题的题或练习题。
+- 以 3 人以上营利公司的名义做的 bot 不能拿奖（全部开源的除外）。以个人名义参赛没问题。
+
+## 换赛季要做的事（每 4 个月一次）
+
+1. 更新 forecasting-tools，拿到新赛季的比赛 ID：`uv lock --upgrade-package forecasting-tools`，然后提交 `uv.lock`。也可以不更新，直接设 `TOURNAMENT_IDS` 变量。
+2. 新模型发布很快。先去 OpenRouter 的模型列表看看三家有没有更新的模型，再改 `FORECASTER_MODELS`。
+3. 想同步官方模板的更新时，注意我们改过 workflows、README、`.env.template`、`pyproject.toml` 和 `uv.lock`，GitHub 上的 "Sync fork" 可能会提示冲突，在本地合并更稳妥。
+
+## 可靠性
+
+- GitHub 的定时任务高峰期会延迟，偶尔还会漏跑。以往赛季的主赛题目每 2 小时放出一道，每道只开放 1.5 小时，漏跑就会错过题目。前几天请多看看 Actions 的运行记录。如果漏得多，可以在 cron-job.org 上每 15 分钟调用一次 GitHub API，手动触发这个 workflow（需要一个只授权本仓库 Actions 读写权限的 fine-grained token）。
+- 公开仓库如果 60 天没有任何提交，GitHub 会自动停用定时任务。赛季中记得偶尔提交一下，或者到 Actions 页面重新启用。
+- 某次运行里有题目失败时，这次运行会标红，GitHub 会发邮件提醒。失败的题下一次运行会重试，但每次重试都要花钱，所以看到连续标红请及时检查。
+
+## 本地运行和测试
+
 ```bash
 uv sync
-```
-This creates a virtualenv in `.venv` inside the project, so most editors pick it up automatically.
-
-### 4. Set your API keys
-Copy the template and fill in your real keys:
-```bash
-cp .env.template .env
-```
-Then open `.env` in any text editor and replace each `REPLACE_ME` with your real key. At minimum you need `METACULUS_TOKEN` and one LLM key (`OPENROUTER_API_KEY` is recommended). See the comments inside `.env.template` for where to get each one.
-
-### 5. Run the bot
-**First run — smoke-test against the [bot-testing-area tournament](https://www.metaculus.com/tournament/bot-testing-area/):**
-```bash
-uv run python main.py --mode test_questions
-```
-You'll see a one-line startup banner, forecasting progress logs, then a `🎉 Bot submitted N forecast(s)` banner with direct links to each forecast on Metaculus. To see the bot's forecast on those pages, [switch to your bot account](#seeing-your-bots-forecasts).
-
-**Forecast on live AIB tournament + MiniBench:**
-```bash
-uv run python main.py --mode tournament
+uv run pytest -q                                          # 离线测试，不联网不花钱
+cp .env.template .env                                     # 填入 METACULUS_TOKEN 和 OPENROUTER_API_KEY
+uv run python run_bot.py --mode test_questions --dry-run  # 在练习题上预测，但不发布
+uv run python run_bot.py --mode minibench                 # 正式预测 MiniBench
 ```
 
-**Forecast on the Metaculus Cup:**
-```bash
-uv run python main.py --mode metaculus_cup
-```
+## 代码结构
 
-**Run the no-framework reference implementation instead:**
-```bash
-uv run python main_with_no_framework.py
-```
-This file has no `--mode` flag; it's controlled by the constants at the top of the file (`SUBMIT_PREDICTION`, `USE_EXAMPLE_QUESTIONS`, `TOURNAMENT_ID`, etc.). Flip `USE_EXAMPLE_QUESTIONS = True` to point it at the bot-testing-area tournament instead of the live AIB.
+| 文件 | 作用 |
+|---|---|
+| `run_bot.py` | 入口：拉取题目、筛选、预测、汇总 |
+| `ensemble_bot/bot.py` | 集成 bot，继承官方 `FallTemplateBot2026` |
+| `ensemble_bot/research.py` | 并行研究：AskNews、联网搜索、判定数据源 |
+| `ensemble_bot/sources.py` | 从题目里提取网址、抓取网页、HTML 转文本 |
+| `ensemble_bot/prompts.py` | 所有提示词 |
+| `ensemble_bot/config.py` | 从环境变量读取设置；`standard` / `budget` 两套模型配置 |
+| `ensemble_bot/dates.py`、`selection.py` | 时间信息计算；每次运行挑选哪些题 |
+| `tests/` | 离线测试 |
+| `main.py` | 官方模板原版（未改动，作参照） |
 
-To stop publishing forecasts (dry-run mode):
-- `main.py`: set `publish_reports_to_metaculus=False` in the `FallTemplateBot2026(...)` constructor near the bottom.
-- `main_with_no_framework.py`: set `SUBMIT_PREDICTION = False` at the top.
+## 有用的链接
 
-## Reviewing how your bot did
-
-Once your questions start resolving, the community-member-maintained optional
-[bot-review](https://github.com/LouisP96/metaculus-bot-review) integration scores them and
-helps to diagnose any reasoning errors.
-
-```bash
-uv run --group integrations bot-review review --resolved-since 30
-```
-
-A weekly workflow and a Claude Code skill come with it. See the
-[integrations README](integrations/README.md#bot-review).
-
-## Example usage of /news and /deepnews:
-If you are using AskNews, here is some useful example code.
-```python
-from asknews_sdk import AsyncAskNewsSDK
-import asyncio
-
-"""
-More information available here:
-https://docs.asknews.app/en/news
-https://docs.asknews.app/en/deepnews
-
-Installation:
-pip install asknews
-"""
-
-client_id = ""
-client_secret = ""
-
-ask = AsyncAskNewsSDK(
-    client_id=client_id,
-    client_secret=client_secret,
-    scopes=["chat", "news", "stories", "analytics"],
-)
-
-# /news endpoint example
-async def search_news(query):
-
-  hot_response = await ask.news.search_news(
-      query=query, # your natural language query
-      n_articles=5, # control the number of articles to include in the context
-      return_type="both",
-      strategy="latest news" # enforces looking at the latest news only
-  )
-
-  print(hot_response.as_string)
-
-  # get context from the "historical" database that contains a news archive going back to 2023
-  historical_response = await ask.news.search_news(
-      query=query,
-      n_articles=10,
-      return_type="both",
-      strategy="news knowledge" # looks for relevant news within the past 60 days
-  )
-
-  print(historical_response.as_string)
-
-# /deepnews endpoint example:
-async def deep_research(
-    query, sources, model, search_depth=2, max_depth=2
-):
-
-    response = await ask.chat.get_deep_news(
-        messages=[{"role": "user", "content": query}],
-        search_depth=search_depth,
-        max_depth=max_depth,
-        sources=sources,
-        stream=False,
-        return_sources=False,
-        model=model,
-        inline_citations="numbered"
-    )
-
-    print(response)
-
-
-if __name__ == "__main__":
-    query = "What is the TAM of the global market for electric vehicles in 2025? With your final report, please report the TAM in USD using the tags <TAM> ... </TAM>"
-
-    sources = ["asknews"]
-    model = "deepseek-basic"
-    search_depth = 2
-    max_depth = 2
-    asyncio.run(
-        deep_research(
-            query, sources, model, search_depth, max_depth
-        )
-    )
-
-    asyncio.run(search_news(query))
-```
-
-Some tips for DeepNews:
-
-You will get tags in your response, including:
-
-<think> </think>
-<asknews_search> </asknews_search>
-<final_response> </final_response>
-
-These tags are likely useful for extracting the pieces that you need for your pipeline. For example, if you don't want to include all the thinking/searching, you could just extract <final_response> </final_response>
-
-
-## Integrations
-
-The **[integrations/](integrations/)** folder contains example scripts that integrate third-party tools with the bot template. 
-
-See the [integrations README](integrations/README.md) for available integrations and how to add your own.
-
-## Ideas for bot improvements
-You can find some ideas of what you can do to improve this template by taking a look at what other bots have done [here](https://www.metaculus.com/notebooks/43497/what-are-other-bots-doing/). You can also look at research done by Metaculus and the field in the [research section](https://www.metaculus.com/notebooks/38928/ai-benchmark-resources/#research-reports-and-overview-of-the-field) of the bot resources page. Asking an LLM to read through everything and give ideas may be a decent place to start. Please try to do something new, or something that is a spinoff (or better implementation) of what others have done. We don't want to test the same idea multiple times.
+- 参赛页面：https://www.metaculus.com/futureeval/participate/
+- 资源页（规则、开源 bot 列表）：https://www.metaculus.com/notebooks/38928/futureeval-resources-page/
+- Metaculus Discord 的 build-a-forecasting-bot 频道：https://discord.gg/metaculus
